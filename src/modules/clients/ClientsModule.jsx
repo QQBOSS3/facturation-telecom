@@ -311,7 +311,9 @@ const ClientDetail = ({ client, rows, allClients, invoicesDB, onEdit, onBack, on
   );
 };
  
-// ── Liste clients ──
+// Module de gestion de la base clients
+// Les clients sont auto-détectés depuis les CDR importés, puis enrichissables manuellement
+// Supporte une hiérarchie groupe/site avec drag & drop
 const ClientsModule = ({ rows, clientsDB, setClientsDB, invoicesDB={} }) => {
   const [search, setSearch]     = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -320,7 +322,9 @@ const ClientsModule = ({ rows, clientsDB, setClientsDB, invoicesDB={} }) => {
   const [dragging, setDragging]         = useState(null);   // nom du client en cours de drag
   const [dragOver, setDragOver]         = useState(null);   // nom du groupe survolé
  
-  // Fusionner CDR + DB : les clients CDR qui ne sont pas encore dans la DB sont auto-créés
+  // Fusion CDR + base clients manuelle :
+  // - les nouveaux clients CDR sont créés avec une fiche vide à compléter
+  // - les clients existants voient leurs fournisseurs mis à jour si besoin
   const allClients = useMemo(() => {
     const cdrClients = {};
     rows.forEach(r => {

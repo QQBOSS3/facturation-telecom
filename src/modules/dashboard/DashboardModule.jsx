@@ -50,6 +50,8 @@ const Delta = ({ val, invert=false }) => {
 // ─────────────────────────────────────────────────────────────
 // DASHBOARD MODULE
 // ─────────────────────────────────────────────────────────────
+// Dashboard principal — vue d'ensemble avec KPIs, graphique d'évolution et top 5 clients
+// Toutes les données sont calculées à la volée depuis les lignes CDR passées en props
 export default function DashboardModule({ rows, clientsDB, onNavigate }) {
 
   if (rows.length === 0) return (
@@ -63,7 +65,8 @@ export default function DashboardModule({ rows, clientsDB, onNavigate }) {
     </div>
   );
 
-  // ── Calculs de base ──
+  // ── Agrégats mensuels ─────────────────────────────────────────
+  // On groupe les lignes par mois (clé "YYYY-MM") pour alimenter le graphique
   const allMonths = [...new Set(rows.map(r=>r.monthKey))].filter(m=>m!=='unknown').sort();
   const clients   = [...new Set(rows.map(r=>r.client))];
 
@@ -94,7 +97,8 @@ export default function DashboardModule({ rows, clientsDB, onNavigate }) {
   const totalMarge = rows.reduce((s,r)=>s+r.marge,0);
   const totalDur   = rows.reduce((s,r)=>s+r.duration,0);
 
-  // ── Top 5 clients ──
+  // ── Top 5 clients ─────────────────────────────────────────────
+  // Calcul du delta entre le mois courant et le précédent pour afficher la tendance
   const clientMap = {};
   rows.forEach(r => {
     if (!clientMap[r.client]) clientMap[r.client] = { name:r.client, byMonth:{}, providers:new Set() };
@@ -117,7 +121,8 @@ export default function DashboardModule({ rows, clientsDB, onNavigate }) {
   })).filter(p=>p.marge>0);
   const totalByP = byProvider.reduce((s,p)=>s+p.marge,0);
 
-  // ── Alertes ──
+  // ── Alertes contrats ──────────────────────────────────────────
+  // Remonte les contrats qui expirent dans les 30 jours et les fortes baisses de conso
   const alerts = [];
   const now  = new Date();
   const in30 = new Date(now.getTime() + 30*24*60*60*1000);

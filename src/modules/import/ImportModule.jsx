@@ -4,12 +4,15 @@ import { T, PROVIDERS, FTP_SERVER } from '../../constants';
 import { Badge } from '../../components/ui';
 
 
+// Module d'import des fichiers CDR
+// Deux sources possibles : glisser-déposer/sélection manuelle, ou récupération via le serveur FTP intermédiaire
 const ImportModule = ({ rows, onImport, isProcessing, filesMeta, onClear }) => {
   const [ftpStatus,  setFtpStatus]  = useState(null);
   const [ftpFiles,   setFtpFiles]   = useState([]);
   const [ftpSyncing, setFtpSyncing] = useState(false);
   const [ftpMsg,     setFtpMsg]     = useState('');
  
+  // Vérifie si le serveur FTP Node.js est joignable et récupère la liste des CSV disponibles
   const checkFTP = async () => {
     setFtpStatus('checking');
     try {
@@ -44,6 +47,7 @@ const ImportModule = ({ rows, onImport, isProcessing, filesMeta, onClear }) => {
     }
   };
  
+  // Télécharge chaque CSV depuis le serveur et les passe à onImport comme si c'était des fichiers locaux
   const importFromFTP = async () => {
     if (!ftpFiles.length) return;
     const fakeFiles = [];

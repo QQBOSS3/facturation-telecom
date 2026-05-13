@@ -23,17 +23,21 @@ import ReportsModule   from './modules/reports/ReportsModule';
 // APP ROOT
 // ─────────────────────────────────────────────────────────────
 export default function App() {
+  // ── État global de l'application ──────────────────────────────
+  // Tout le state est centralisé ici et descendu en props dans chaque module
   const [activeModule, setActive] = useState('dashboard');
-  const [rows, setRows]           = useState([]);
-  const [filesMeta, setMeta]      = useState([]);
-  const [isProcessing, setProc]   = useState(false);
-  const [storageStatus, setStorageStatus] = useState('idle');
-  const [sessionInfo, setSessionInfo]     = useState(null);
-  const [showRestore, setShowRestore]     = useState(false);
-  const [clientsDB, setClientsDB]         = useState({});
-  const [invoicesDB, setInvoicesDB]       = useState({});
+  const [rows, setRows]           = useState([]);       // toutes les lignes CDR chargées
+  const [filesMeta, setMeta]      = useState([]);       // métadonnées des fichiers importés
+  const [isProcessing, setProc]   = useState(false);    // import en cours
+  const [storageStatus, setStorageStatus] = useState('idle'); // état de la sauvegarde localStorage
+  const [sessionInfo, setSessionInfo]     = useState(null);   // info de la dernière session sauvegardée
+  const [showRestore, setShowRestore]     = useState(false);  // affichage de la bannière de restauration
+  const [clientsDB, setClientsDB]         = useState({});     // base clients persistée (nom → objet client)
+  const [invoicesDB, setInvoicesDB]       = useState({});     // base factures persistée (id → objet facture)
 
-  // ── Chargement de la session au démarrage ──
+  // ── Chargement de la session au démarrage ──────────────────────
+  // On tente de récupérer les données persistées du localStorage
+  // Si une session existe, on propose à l'utilisateur de la restaurer
   useEffect(() => {
     try {
       const rawClients = localStorage.getItem('dm-clients-db');
@@ -49,7 +53,9 @@ export default function App() {
     } catch (e) { /* pas de session */ }
   }, []);
 
-  // ── Sauvegarde automatique après chaque import ──
+  // ── Sauvegarde automatique après chaque import ─────────────────
+  // Le localStorage est limité à ~5MB par navigateur
+  // On découpe les lignes en chunks de 3000 pour ne pas dépasser la limite
   const saveToStorage = async (allRows, allMeta) => {
     setStorageStatus('saving');
     try {
@@ -100,7 +106,8 @@ export default function App() {
     }
   };
 
-  // ── Import de fichiers CSV ──
+  // ── Import de fichiers CSV ──────────────────────────────────────
+  // Parcourt chaque fichier, délègue le parsing à PE.parseFile, puis cumule les lignes
   const handleImport = async (files) => {
     setProc(true);
     try {

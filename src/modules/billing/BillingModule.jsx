@@ -114,14 +114,16 @@ const InvoiceDetail = ({ invoice, clientData, onBack, onSave }) => {
   );
 };
  
-// ── Module Facturation principal ──
+// Module de facturation
+// Deux onglets : "Clients facturables" (générés depuis les CDR) et "Historique" (factures sauvegardées)
+// Les factures sont persistées dans le localStorage via invoicesDB
 const BillingModule = ({ rows, invoicesDB, setInvoicesDB, clientsDB }) => {
   const [search, setSearch]   = useState('');
   const [provider, setProv]   = useState('all');
   const [tab, setTab]         = useState('clients');   // 'clients' | 'history'
   const [openInvoice, setOpen] = useState(null);       // objet invoice sauvegardé
  
-  // Données CDR par client
+  // Regroupe les lignes CDR par client pour obtenir le total facturable de chacun
   const clientMap = useMemo(() => {
     const map = {};
     rows.forEach(r => {
@@ -151,7 +153,7 @@ const BillingModule = ({ rows, invoicesDB, setInvoicesDB, clientsDB }) => {
     [invoicesDB]
   );
  
-  // Créer et sauvegarder une facture
+  // Génère une nouvelle facture à partir des données CDR du client et l'ouvre directement
   const createInvoice = (client) => {
     const now = new Date();
     const inv = {

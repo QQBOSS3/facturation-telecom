@@ -29,6 +29,8 @@ const ChartTooltip = ({ active, payload, label }) => {
   );
 };
 
+// Module Rapports — trois vues : mensuel, par fournisseur, comparatif entre deux mois
+// L'export Excel génère 4 feuilles : récap mensuel, détail clients, par fournisseur, récap annuel
 const ReportsModule = ({ rows }) => {
   const [reportType, setReportType] = useState('monthly');
   const [selMonth,   setSelMonth]   = useState(null);
@@ -113,6 +115,7 @@ const ReportsModule = ({ rows }) => {
   const avgMargePct = totalMarge > 0 ? totalMargeNet/totalMarge : 0;
   const bestMonth = allMonths.reduce((best,mk) => (!best || byMonth[mk].marge > byMonth[best].marge) ? mk : best, null);
 
+  // Génère un fichier Excel avec 4 feuilles de synthèse via la lib SheetJS
   const exportMonthlyXLSX = () => {
     const wb = XLSX.utils.book_new();
 

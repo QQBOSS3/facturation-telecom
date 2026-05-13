@@ -6,6 +6,8 @@ import { T, PROVIDERS, MONTH_LABELS, MARGIN } from '../../constants';
 import { f4, pct } from '../../utils/formatters';
 import { Badge, SectionTitle } from '../../components/ui';
 
+// Module d'analyse CDR — tableau croisé des coûts par client et par mois
+// Trois vues : coût client, coût revendeur, marge (avec calcul du % de marge par cellule)
 const CDRModule = ({ rows }) => {
   const [tab, setTab]     = useState('client');
   const [search, setSearch] = useState('');
@@ -19,6 +21,7 @@ const CDRModule = ({ rows }) => {
     });
   }, [rows]);
  
+  // Construction du pivot : pour chaque client, on cumule coût client et coût revendeur mois par mois
   const pivot = useMemo(() => {
     const map = {};
     rows.forEach(r => {
@@ -46,6 +49,7 @@ const CDRModule = ({ rows }) => {
  
   const toggle = (c) => setHidden(p => { const n=new Set(p); n.has(c)?n.delete(c):n.add(c); return n; });
  
+  // Export Excel : génère deux feuilles (coût client + coût revendeur) avec totaux
   const exportXLSX = () => {
     const wb = XLSX.utils.book_new();
     for (const t of ['client','revendeur']) {
